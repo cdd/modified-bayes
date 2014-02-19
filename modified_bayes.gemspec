@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = ModifiedBayes::VERSION
   spec.authors       = ["Krishna Dole"]
   spec.email         = ["krishna@collaborativedrug.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{Naïve Bayesian model optimized for sparse datasets}
+  spec.summary       = %q{Naïve Bayesian model for sparse datasets}
   spec.homepage      = ""
   spec.license       = "MIT"
 

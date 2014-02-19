@@ -1,4 +1,4 @@
-Copyright (c) 2014 Krishna Dole
+Copyright (c) 2014 Collaborative Drug Discovery, Inc.
 
 MIT License
 

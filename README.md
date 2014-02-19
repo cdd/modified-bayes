@@ -1,6 +1,11 @@
-# ModifiedBayes
+# Modified Bayes
 
-TODO: Write a gem description
+A Naïve Bayesian model optimized for sparse datasets, implemented as described in:
+
+Xia X, Maliski EG, Gallant P, Rogers D: Classification of kinase 
+inhibitors using a Bayesian model. J Med Chem 2004;47:4463-4470.
+
+In summary, a small-sample correction is applied, (currently the Laplace correction), the probability is normalized, the natural log is taken and the results are summed.
 
 ## Installation
 
@@ -18,7 +23,22 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+The features in this example are strings, but features can be any kind of object.
+
+    positive_samples = [
+      ["sweet", "yellow"],
+      ["sweet"]
+    ]
+
+    negative_samples = [
+      ["sweet", "round"],
+      ["sweet", "yellow"],
+      ["sweet"],
+      ["round"]
+    ]
+
+    model = ModifiedBayes::Model.new(positive_samples, negative_samples)
+    model.score(["sweet", "yellow"]) #=> 0.3001; this sample is predicted to be positive
 
 ## Contributing
 
