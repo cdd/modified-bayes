@@ -75,6 +75,48 @@ describe ModifiedBayes::Model do
   end
 end
 
+describe ModifiedBayes::Model, "#add(positives = [], negatives = [])" do
+  before(:each) do
+    @positive_samples = [
+      ["sweet", "yellow"],
+    ]
+
+    @negative_samples = [
+      ["sweet", "yellow"],
+      ["round"]
+    ]
+    
+    @model = ModifiedBayes::Model.new(@positive_samples, @negative_samples)
+    @model.positive_sample_count.should == 1
+    @model.negative_sample_count.should == 2
+    @model.positive_feature_counts.should == {"sweet"=>1, "yellow"=>1}
+    @model.negative_feature_counts.should == {"sweet"=>1, "yellow"=>1, "round"=>1}
+    @model.score(["round"]).should be_within(1e-4).of(-0.28768)
+  end
+  
+  it "does nothing when the arguments are empty" do
+    @model.add
+    @model.add([])
+    @model.add([], [])
+    @model.positive_sample_count.should == 1
+    @model.negative_sample_count.should == 2
+    @model.positive_feature_counts.should == {"sweet"=>1, "yellow"=>1}
+    @model.negative_feature_counts.should == {"sweet"=>1, "yellow"=>1, "round"=>1}
+    @model.score(["round"]).should be_within(1e-4).of(-0.28768)
+  end
+  
+  it "updates the model attributes correctly and uses them for scoring" do
+    @model.add([["sweet"]], [["sweet"]])
+    @model.add([], [["sweet", "round"]])
+    @model.positive_sample_count.should == 2
+    @model.negative_sample_count.should == 4
+    @model.positive_feature_counts.should == {"sweet"=>2, "yellow"=>1}
+    @model.negative_feature_counts.should == {"sweet"=>3, "yellow"=>1, "round"=>2}
+    
+    @model.score(["sweet", "yellow"]).should be_within(1e-4).of(0.3001)
+  end
+end
+
 describe ModifiedBayes::Model, "#dump and #load" do
   before(:each) do
     @positive_samples = [

@@ -7,13 +7,16 @@ module ModifiedBayes
 
     def initialize(positives = [], negatives = [])
       @positive_sample_count, @negative_sample_count = positives.size, negatives.size
-
-      @positive_feature_counts = positives.each_with_object(Hash.new(0)) do |features, counts|
-        features.each { |f| counts[f] += 1 }
-      end
-      @negative_feature_counts = negatives.each_with_object(Hash.new(0)) do |features, counts|
-        features.each { |f| counts[f] += 1 }
-      end
+      @positive_feature_counts, @negative_feature_counts = Hash.new(0), Hash.new(0)
+      add_counts(@positive_feature_counts, positives)
+      add_counts(@negative_feature_counts, negatives)
+    end
+    
+    def add(positives = [], negatives = [])
+      @positive_sample_count += positives.size
+      @negative_sample_count += negatives.size
+      add_counts(@positive_feature_counts, positives)
+      add_counts(@negative_feature_counts, negatives)
     end
 
     def score(features)
@@ -38,6 +41,14 @@ module ModifiedBayes
     def self.load_hash(attributes)
       self.new.tap do |model|
         ATTRIBUTES.each { |sym| model.instance_variable_set("@#{sym}", attributes[sym]) }
+      end
+    end
+    
+    private
+    # can you say "mutable state"?
+    def add_counts(counts_hash, samples)
+      samples.each do |features|
+        features.each { |f| counts_hash[f] += 1 }
       end
     end
   end
