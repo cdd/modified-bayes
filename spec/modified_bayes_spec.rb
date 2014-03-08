@@ -74,3 +74,36 @@ describe ModifiedBayes::Model do
     classifier.score([good_feature, bad_feature]).should be_within(1e-3).of(-1.908 + 2.46)
   end
 end
+
+describe ModifiedBayes::Model, "#dump and #load" do
+  before(:each) do
+    @positive_samples = [
+      ["sweet", "yellow"],
+      ["sweet"]
+    ]
+
+    @negative_samples = [
+      ["sweet", "round"],
+      ["sweet", "yellow"],
+      ["sweet"],
+      ["round"]
+    ]
+
+    @attribute_hash = {
+      :positive_sample_count => 2,
+      :negative_sample_count => 4,
+      :positive_feature_counts => {"sweet"=>2, "yellow"=>1},
+      :negative_feature_counts => {"sweet"=>3, "round"=>2, "yellow"=>1}
+    }
+  end
+
+  it "dumps to a simple hash of attributes" do
+    model = ModifiedBayes::Model.new(@positive_samples, @negative_samples)
+    model.dump_hash.should == @attribute_hash
+  end
+  
+  it "loads from the same type of hash" do
+    model = ModifiedBayes::Model.load_hash(@attribute_hash)
+    model.score(["sweet", "yellow"]).should be_within(1e-4).of(0.3001)
+  end
+end

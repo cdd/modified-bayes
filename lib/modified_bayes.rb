@@ -2,9 +2,10 @@ require "modified_bayes/version"
 
 module ModifiedBayes
   class Model
-    attr_reader :positive_sample_count, :negative_sample_count, :positive_feature_counts, :negative_feature_counts
+    ATTRIBUTES = [:positive_sample_count, :negative_sample_count, :positive_feature_counts, :negative_feature_counts]
+    attr_reader *ATTRIBUTES
 
-    def initialize(positives, negatives)
+    def initialize(positives = [], negatives = [])
       @positive_sample_count, @negative_sample_count = positives.size, negatives.size
 
       @positive_feature_counts = positives.each_with_object(Hash.new(0)) do |features, counts|
@@ -27,6 +28,17 @@ module ModifiedBayes
         nf = pf + @negative_feature_counts[feature]
         Math.log(((pf + p_positive * k) / (nf + k)) / p_positive)
       end.reduce(&:+)
+    end
+
+    # For serialization in a database, transmission as JSON, etc.
+    def dump_hash
+      ATTRIBUTES.each_with_object({}) { |sym, hash| hash[sym] = self.send(sym) }
+    end
+
+    def self.load_hash(attributes)
+      self.new.tap do |model|
+        ATTRIBUTES.each { |sym| model.instance_variable_set("@#{sym}", attributes[sym]) }
+      end
     end
   end
 end
