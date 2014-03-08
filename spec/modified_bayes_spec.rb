@@ -18,10 +18,10 @@ describe ModifiedBayes::Model do
   it "initializes correctly" do
     classifier = ModifiedBayes::Model.new(@banana_features, @orange_features)
     p_pos = 10 / (10 + 6).to_f
-    classifier.p_positive.should == p_pos
-    classifier.k.should == 1 / p_pos
-    classifier.positive_counts.should == {"long" => 8, "sweet" => 7, "yellow" => 9}
-    classifier.negative_counts.should == {"sweet" => 3, "yellow" => 6}
+    classifier.positive_sample_count.should == 10
+    classifier.negative_sample_count.should == 6
+    classifier.positive_feature_counts.should == {"long" => 8, "sweet" => 7, "yellow" => 9}
+    classifier.negative_feature_counts.should == {"sweet" => 3, "yellow" => 6}
   end
 
   it "scores a single feature correctly" do
@@ -66,9 +66,8 @@ describe ModifiedBayes::Model do
     pos_features = [[good_feature]] * 15 + [[]] * 5
     
     classifier = ModifiedBayes::Model.new(pos_features, neg_features)
-    p_pos = positive_sample_count / total_sample_count.to_f
-    classifier.p_positive.should == p_pos
-    classifier.k.should == 1 / p_pos
+    classifier.positive_sample_count.should == positive_sample_count
+    classifier.negative_sample_count.should == total_sample_count - positive_sample_count
     
     classifier.score([bad_feature]).should be_within(1e-3).of(-1.908)
     classifier.score([good_feature]).should be_within(1e-3).of(2.46)
