@@ -149,3 +149,24 @@ describe ModifiedBayes::Model, "#dump and #load" do
     model.score(["sweet", "yellow"]).should be_within(1e-4).of(0.3001)
   end
 end
+
+describe ModifiedBayes::Model, "#applicability(features)" do
+  it "is the fraction of the provided features that were present in the training set, which helps you judge if the model is applicable to this set of features" do
+    positive_samples = [
+      [1, 2],
+      [1, 2, 3]
+    ]
+
+    negative_samples = [
+      [1, 3],
+      [4, 5, 6],
+    ]
+    
+    model = ModifiedBayes::Model.new(positive_samples, negative_samples)
+    model.applicability([1, 5]).should == 1.0
+    model.applicability([7, 8, 9]).should == 0.0
+    model.applicability([1, 7, 8, 9]).should == 0.25
+    model.applicability([2, 9]).should == 0.50
+  end
+end
+

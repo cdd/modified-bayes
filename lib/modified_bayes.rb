@@ -32,6 +32,10 @@ module ModifiedBayes
         Math.log(((pf + p_positive * k) / (nf + k)) / p_positive)
       end.reduce(&:+)
     end
+    
+    def applicability(features)
+      features.count { |f| @positive_feature_counts[f] > 0 || @negative_feature_counts[f] > 0 } / features.size.to_f
+    end
 
     # For serialization in a database, transmission as JSON, etc.
     def dump_hash
