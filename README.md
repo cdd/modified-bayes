@@ -1,9 +1,6 @@
 # Modified Bayes
 
-A Naïve Bayesian model optimized for sparse datasets, implemented as described in:
-
-Xia X, Maliski EG, Gallant P, Rogers D: Classification of kinase 
-inhibitors using a Bayesian model. J Med Chem 2004;47:4463-4470.
+A Naïve Bayesian model optimized for sparse datasets, implemented as described in [Xia et al. 2004](http://dx.doi.org/10.1021/jm0303195).
 
 In summary, a small-sample correction is applied, (currently the Laplace correction), the probability is normalized, the natural log is taken and the results are summed.
 
