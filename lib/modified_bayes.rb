@@ -2,10 +2,11 @@ require "modified_bayes/version"
 
 module ModifiedBayes
   class Model
-    ATTRIBUTES = [:positive_sample_count, :negative_sample_count, :positive_feature_counts, :negative_feature_counts]
+    ATTRIBUTES = [:positive_sample_count, :negative_sample_count, :positive_feature_counts, :negative_feature_counts, :positives]
     attr_reader *ATTRIBUTES
 
     def initialize(positives = [], negatives = [])
+      @positives = positives # only storing this for the maximum similarity calculation; may change
       @positive_sample_count, @negative_sample_count = positives.size, negatives.size
       @positive_feature_counts, @negative_feature_counts = Hash.new(0), Hash.new(0)
       add_counts(@positive_feature_counts, positives)
@@ -13,6 +14,7 @@ module ModifiedBayes
     end
     
     def add(positives = [], negatives = [])
+      @positives += positives
       @positive_sample_count += positives.size
       @negative_sample_count += negatives.size
       add_counts(@positive_feature_counts, positives)
@@ -35,6 +37,15 @@ module ModifiedBayes
     
     def applicability(features)
       features.count { |f| @positive_feature_counts[f] > 0 || @negative_feature_counts[f] > 0 } / features.size.to_f
+    end
+    
+    def maximum_similarity(features)
+      @positives.map { |positive| jaccard_index(positive, features) }.max
+    end
+
+    # aka Tanimoto similarity
+    def jaccard_index(a, b)
+      (a & b).size / (a | b).size.to_f
     end
 
     # For serialization in a database, transmission as JSON, etc.

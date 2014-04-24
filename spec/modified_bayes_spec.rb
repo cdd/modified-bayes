@@ -91,6 +91,7 @@ describe ModifiedBayes::Model, "#add(positives = [], negatives = [])" do
     @model.negative_sample_count.should == 2
     @model.positive_feature_counts.should == {"sweet"=>1, "yellow"=>1}
     @model.negative_feature_counts.should == {"sweet"=>1, "yellow"=>1, "round"=>1}
+    @model.positives.should == @positive_samples
     @model.score(["round"]).should be_within(1e-4).of(-0.28768)
   end
   
@@ -102,6 +103,7 @@ describe ModifiedBayes::Model, "#add(positives = [], negatives = [])" do
     @model.negative_sample_count.should == 2
     @model.positive_feature_counts.should == {"sweet"=>1, "yellow"=>1}
     @model.negative_feature_counts.should == {"sweet"=>1, "yellow"=>1, "round"=>1}
+    @model.positives.should == @positive_samples
     @model.score(["round"]).should be_within(1e-4).of(-0.28768)
   end
   
@@ -112,7 +114,7 @@ describe ModifiedBayes::Model, "#add(positives = [], negatives = [])" do
     @model.negative_sample_count.should == 4
     @model.positive_feature_counts.should == {"sweet"=>2, "yellow"=>1}
     @model.negative_feature_counts.should == {"sweet"=>3, "yellow"=>1, "round"=>2}
-    
+    @model.positives.should == (@positive_samples + [["sweet"]])
     @model.score(["sweet", "yellow"]).should be_within(1e-4).of(0.3001)
   end
 end
@@ -135,7 +137,8 @@ describe ModifiedBayes::Model, "#dump and #load" do
       :positive_sample_count => 2,
       :negative_sample_count => 4,
       :positive_feature_counts => {"sweet"=>2, "yellow"=>1},
-      :negative_feature_counts => {"sweet"=>3, "round"=>2, "yellow"=>1}
+      :negative_feature_counts => {"sweet"=>3, "round"=>2, "yellow"=>1},
+      :positives => [["sweet", "yellow"], ["sweet"]]
     }
   end
 
@@ -169,4 +172,32 @@ describe ModifiedBayes::Model, "#applicability(features)" do
     model.applicability([2, 9]).should == 0.50
   end
 end
+
+describe ModifiedBayes::Model, "#jaccard_index(a, b)" do
+  it "should be the size of the intersection divided by the size of the union" do
+    model = ModifiedBayes::Model.new
+    model.jaccard_index([1,2,3,4], [2,4]).should == 0.5
+    model.jaccard_index([1,2,3,4], [7,8,9]).should == 0.0
+    model.jaccard_index([1,2,3], [2,3,4]).should == 0.5
+    model.jaccard_index([1,2,3], [1,2,3]).should == 1.0
+    model.jaccard_index([1,2,3], [3,4,5]).should == 0.2
+
+    model.jaccard_index([], []).should be_nan # when scoring observations you will likely want to record an error before reaching this point
+    model.jaccard_index([1], []).should == 0.0
+    model.jaccard_index([], [1]).should == 0.0
+  end
+end
+
+describe ModifiedBayes::Model, "#maximum_similarity(features)" do
+  it "is the maximum (Jaccard) similarity to any one of the entries in the positive feature lists" do
+    model = ModifiedBayes::Model.new([[1,2,4], [1,9,3]], [])
+
+    model.maximum_similarity([1]).should == (1 / 3.0)
+    model.maximum_similarity([1,2]).should == (2 / 3.0)
+    model.maximum_similarity([1,9,3]).should == 1.0
+    model.maximum_similarity([88,99]).should == 0.0
+  end
+end
+
+
 
