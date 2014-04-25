@@ -6,19 +6,20 @@ module ModifiedBayes
     attr_reader *ATTRIBUTES
 
     def initialize(positives = [], negatives = [])
-      @positives = positives.map(&:sort) # only storing this for the maximum similarity calculation; may change
       @positive_sample_count, @negative_sample_count = positives.size, negatives.size
       @positive_feature_counts, @negative_feature_counts = Hash.new(0), Hash.new(0)
       add_counts(@positive_feature_counts, positives)
       add_counts(@negative_feature_counts, negatives)
+      # only storing this for the maximum similarity calculation; may change
+      @positive_hashes = feature_hashes(positives)
     end
     
     def add(positives = [], negatives = [])
-      @positives = (@positives + positives).map(&:sort)
       @positive_sample_count += positives.size
       @negative_sample_count += negatives.size
       add_counts(@positive_feature_counts, positives)
       add_counts(@negative_feature_counts, negatives)
+      @positive_hashes += feature_hashes(positives)
     end
 
     def score(features)
@@ -39,17 +40,14 @@ module ModifiedBayes
       features.count { |f| @positive_feature_counts[f] > 0 || @negative_feature_counts[f] > 0 } / features.size.to_f
     end
     
+    # The maximum Jaccard/Tanimoto similarity to positive samples
     def maximum_similarity(features)
-      sorted = features.sort
-      @positives.map { |positive| jaccard_index(positive, sorted) }.max
-    end
-
-    # aka Tanimoto similarity coefficient
-    # NOTE: a and b must already be sorted
-    def jaccard_index(a, b)
-      intersection = intersection_size(a, b)
-      union = a.size + b.size - intersection
-      intersection / union.to_f
+      @positive_hashes.map do |positive_hash|
+        # PERFORMANCE: hash lookups turn out to be much faster than computing set or array intersections
+        intersection = positive_hash.values_at(*features).compact.size
+        union = positive_hash.size + features.size - intersection
+        intersection / union.to_f
+      end.max
     end
 
     # For serialization in a database, transmission as JSON, etc.
@@ -64,32 +62,16 @@ module ModifiedBayes
     end
     
     private
+    def feature_hashes(list)
+      list.map do |features|
+        features.each_with_object({}) {|f, hash| hash[f] = true }
+      end
+    end
+
     def add_counts(counts_hash, samples)
       samples.each do |features|
         features.each { |f| counts_hash[f] += 1 }
       end
-    end
-    
-    # PERFORMANCE: intersection, and especially union, are slow in Ruby.
-    # Converting the arrays to sets first actually makes it worse in my benchmarks.
-    # a and b must already be sorted
-    def intersection_size(a, b)
-      ai = bi = result = 0
-      a_length, b_length = a.length, b.length
-
-      while (ai < a_length && bi < b_length ) do
-         if a[ai] < b[bi]
-           ai += 1
-         elsif a[ai] > b[bi]
-           bi += 1
-         else # they're equal
-           result += 1
-           ai += 1
-           bi += 1
-         end
-      end
-
-      return result
     end
   end
 end

@@ -1,7 +1,6 @@
 $LOAD_PATH.unshift(File.expand_path('../../lib', __FILE__))
 require 'modified_bayes'
 require 'benchmark'
-require 'set'
 
 # We want to benchmark with large arrays of 32-bit integers (ruby actually stores integers
 # using 64 bits on my platform, but I'm trying to stay faithful to the real data).
@@ -37,7 +36,7 @@ bayes = ModifiedBayes::Model.new(positives)
 # Results for 1000 positives, each with 100 features, scoring 100 samples, each with 100 features
 # 7.17 - Ruby intersection and union methods: 7.17
 # 1.73 - intersection_size method, inferring the union from that
-# 2.28 - 
+# 0.91 - David's clever hash idea + method inlining
 puts Benchmark.measure {
   to_score.each do |features|
     bayes.maximum_similarity(features)
