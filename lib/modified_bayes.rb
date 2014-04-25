@@ -2,7 +2,7 @@ require "modified_bayes/version"
 
 module ModifiedBayes
   class Model
-    ATTRIBUTES = [:positive_sample_count, :negative_sample_count, :positive_feature_counts, :negative_feature_counts, :positives]
+    ATTRIBUTES = [:positive_sample_count, :negative_sample_count, :positive_feature_counts, :negative_feature_counts, :positive_hashes]
     attr_reader *ATTRIBUTES
 
     def initialize(positives = [], negatives = [])

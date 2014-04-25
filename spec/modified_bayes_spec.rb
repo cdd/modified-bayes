@@ -91,7 +91,7 @@ describe ModifiedBayes::Model, "#add(positives = [], negatives = [])" do
     @model.negative_sample_count.should == 2
     @model.positive_feature_counts.should == {"sweet"=>1, "yellow"=>1}
     @model.negative_feature_counts.should == {"sweet"=>1, "yellow"=>1, "round"=>1}
-    @model.positives.should == [{"sweet"=>true, "yellow"=>true}]
+    @model.positive_hashes.should == [{"sweet"=>true, "yellow"=>true}]
     @model.score(["round"]).should be_within(1e-4).of(-0.28768)
   end
   
@@ -103,7 +103,7 @@ describe ModifiedBayes::Model, "#add(positives = [], negatives = [])" do
     @model.negative_sample_count.should == 2
     @model.positive_feature_counts.should == {"sweet"=>1, "yellow"=>1}
     @model.negative_feature_counts.should == {"sweet"=>1, "yellow"=>1, "round"=>1}
-    @model.positives.should == [{"sweet"=>true, "yellow"=>true}]
+    @model.positive_hashes.should == [{"sweet"=>true, "yellow"=>true}]
     @model.score(["round"]).should be_within(1e-4).of(-0.28768)
   end
   
@@ -114,7 +114,7 @@ describe ModifiedBayes::Model, "#add(positives = [], negatives = [])" do
     @model.negative_sample_count.should == 4
     @model.positive_feature_counts.should == {"sweet"=>2, "yellow"=>1}
     @model.negative_feature_counts.should == {"sweet"=>3, "yellow"=>1, "round"=>2}
-    @model.positives.should == [{"sweet"=>true, "yellow"=>true}, {"sweet" => true}]
+    @model.positive_hashes.should == [{"sweet"=>true, "yellow"=>true}, {"sweet" => true}]
     @model.score(["sweet", "yellow"]).should be_within(1e-4).of(0.3001)
   end
 end
@@ -138,7 +138,7 @@ describe ModifiedBayes::Model, "#dump and #load" do
       :negative_sample_count => 4,
       :positive_feature_counts => {"sweet"=>2, "yellow"=>1},
       :negative_feature_counts => {"sweet"=>3, "round"=>2, "yellow"=>1},
-      :positives => [{"sweet"=>true, "yellow"=>true}, {"sweet"=>true}]
+      :positive_hashes => [{"sweet"=>true, "yellow"=>true}, {"sweet"=>true}]
     }
   end
 
